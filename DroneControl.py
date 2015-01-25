@@ -10,7 +10,7 @@ class Drone:
     mEnd = False
     mAi = None
     #debug/testing
-    script = ["010", "20", "010"]
+    script = ["31", "30", "010"]
     scriptCount = 0
     
     def __init__(s):

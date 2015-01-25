@@ -10,8 +10,8 @@ import socket
 class turtle:
     height = 20#of field
     width = 20
-    pos = (1, 1)
-    angle = 6.28
+    mPos = (1, 1)
+    mAngle = 6.28
     ob = []#obstacles
     #ob = [(5, 5)]
     movement = 1#many blocks turtle moves by
@@ -126,46 +126,46 @@ class turtle:
         frame.focus_set()
     
     def draw(s):
-        x = ((s.pos[0]+1)*10)-10
-        y = ((s.pos[1]+1)*10)-10
-        lineX = ((s.pos[0] + m.cos(s.angle)+1)*10)-10
-        lineY = ((s.pos[1] - m.sin(s.angle)+1)*10)-10
+        x = ((s.mPos[0]+1)*10)-10
+        y = ((s.mPos[1]+1)*10)-10
+        lineX = ((s.mPos[0] + m.cos(s.mAngle)+1)*10)-10
+        lineY = ((s.mPos[1] - m.sin(s.mAngle)+1)*10)-10
         s.canvas.delete(s.rec)
         s.rec = s.canvas.create_rectangle(x, y, x+9, y+9)
         s.canvas.delete(s.line)
         s.line = s.canvas.create_line(x+5, y+5, lineX+5, lineY+5, fill="red")            
     
     def turnLeft(s, event=None, angle=m.pi/2):#90deg=pi/2, etc
-        s.angle = s.angle + angle
-        if s.angle > 2*m.pi:
-            s.angle = 0 + s.angle-2*m.pi
-        s.angle = round(s.angle, 2)
-        #print(s.angle)
+        s.mAngle = s.mAngle + angle
+        if s.mAngle > 2*m.pi:
+            s.mAngle = 0 + s.mAngle-2*m.pi
+        s.mAngle = round(s.mAngle, 2)
+        #print(s.mAngle)
         s.draw()
 
     def turnRight(s, event=None, angle=m.pi/2):
-        s.angle = s.angle - angle
-        if s.angle <= 0:
-            s.angle = 2*m.pi + s.angle
-        s.angle = round(s.angle, 2)
-        #print(s.angle)
+        s.mAngle = s.mAngle - angle
+        if s.mAngle <= 0:
+            s.mAngle = 2*m.pi + s.mAngle
+        s.mAngle = round(s.mAngle, 2)
+        #print(s.mAngle)
         s.draw()
 
     def move(s, event=None, moves=1):
         for x in range(0, moves):
-            pos = (s.pos[0] + (m.cos(s.angle)*s.movement), s.pos[1] - (m.sin(s.angle)*s.movement))
+            pos = (s.mPos[0] + (m.cos(s.mAngle)*s.movement), s.mPos[1] - (m.sin(s.mAngle)*s.movement))
             pos = (round(pos[0], 2), round(pos[1], 2))
 	    #check for objects in way
 	    #check inside field
             if (not s.getAhead()):
                 if (pos[0] >= 0 and pos[0]+1 <= s.width and pos[1] >= 0 and pos[1]+1 <= s.height):
                     s.ai.updateNode()
-                    s.pos = pos
+                    s.mPos = pos
                     s.draw()
                     s.ai.updateNode()
                     
     def getAhead(s):
-        pos = (s.pos[0] + (m.cos(s.angle)*s.movement), s.pos[1] - (m.sin(s.angle)*s.movement))
+        pos = (s.mPos[0] + (m.cos(s.mAngle)*s.movement), s.mPos[1] - (m.sin(s.mAngle)*s.movement))
         pos = (round(pos[0], 2), round(pos[1], 2))
         #check for objects in way
         canMove = True
@@ -176,6 +176,7 @@ class turtle:
                 #print ("Pos: " + str(pos) + " Object: " + str(o))
                 return o
         return False
+    
     #for local host receiving
     def recvall(s, sock, count):
         try:
