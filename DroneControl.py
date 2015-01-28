@@ -2,6 +2,7 @@ from BluetoothConnection import BluetoothConnection
 from Ai import Ai
 import time
 import math as m
+#0.1.0
 class Drone:
     mBC = None
     mPos = (0, 0)#internal coords for drone

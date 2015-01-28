@@ -3,6 +3,7 @@ import threading as t
 import math as m
 import time
 from Node import Node
+#0.1.1
 class Ai:
     mState = 0#0 pause, 1 explore, 2 return, 3 stop
     mDrone = None
@@ -33,7 +34,7 @@ class Ai:
                     for ii in range(0, 4):
                         if (i > len(s.mPosDir)-1):
                             i = 0;
-                        if (i == skipDir):
+                        if (s.mDrone.mAngle == s.mPosDir[skipDir]):
                             i += 1
                             continue
                         s.faceDir(s.mPosDir[i])

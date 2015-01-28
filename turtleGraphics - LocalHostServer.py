@@ -1,12 +1,13 @@
 from tkinter import *
 from Ai import Ai
+from PIL import Image
 import threading as t
 import time
 import math as m
 import random as r
 import socket
 
-#python version: 3
+#0.3.0
 class turtle:
     height = 20#of field
     width = 20
@@ -25,6 +26,10 @@ class turtle:
     ai = None
     
     def __init__(s):
+        img = Image.open("maze.jpg")
+        pixels = img.load()
+        s.width, s.height = img.size
+        
         s.root = Tk()
         s.canvas = Canvas(s.root, width=s.width*10+10, height=s.height*10+10)
         s.canvas.pack()
@@ -37,16 +42,11 @@ class turtle:
         s.clientThread.start()
 
         s.ai = Ai(s)
-    
-        for i in range(0, s.width):
-            s.ob.append((i, 0))
-            s.ob.append((i, s.height))
-        for i in range(0, s.height):
-            s.ob.append((0, i))
-            s.ob.append((s.width, i))
-        for ii in range(0, 10):
-            for i in range(1, s.width-1):
-                s.ob.append((i, ii*2))
+
+        for x in range(s.width):
+            for y in range(s.height):
+                if (pixels[x, y] >= (0, 0, 0) and pixels[x, y] <= (10, 10, 10)):
+                    s.ob.append((x, y))
         
         s.draw()
         for o in s.ob:
@@ -199,5 +199,3 @@ class turtle:
         s.root.after(0, s.root.destroy)
                 
 t = turtle()
-
-
