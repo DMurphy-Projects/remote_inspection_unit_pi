@@ -11,7 +11,7 @@ import socket
 class turtle:
     height = 20#of field
     width = 20
-    mPos = (1, 1)
+    mPos = (5, 5)
     mAngle = 6.28
     ob = []#obstacles
     #ob = [(5, 5)]

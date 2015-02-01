@@ -3,7 +3,7 @@ import threading as t
 import math as m
 import time
 from Node import Node
-#0.1.1
+#0.1.2
 class Ai:
     mState = 0#0 pause, 1 explore, 2 return, 3 stop
     mDrone = None
@@ -26,19 +26,13 @@ class Ai:
             elif (s.mState == 1):
                 print ("Exploring")
                 end = False
-                i = 0
                 while (s.mState == 1):
                     avDir = False#available direction
-                    skipDir = i - 2#the direction that is 180 degrees of the current direction
-                    if (skipDir < 0): skipDir += 4
-                    for ii in range(0, 4):
-                        if (i > len(s.mPosDir)-1):
-                            i = 0;
-                        if (s.mDrone.mAngle == s.mPosDir[skipDir]):
-                            i += 1
-                            continue
+                    #skipDir = s.getOppositeDir(s.getCardinalDir())#the direction that is 180 degrees of the current direction
+                    for i in s.mCurNode.mDir[:]:
                         s.faceDir(s.mPosDir[i])
                         block = s.mDrone.getAhead()
+                        s.mCurNode.remove(i)
                         #print ("Block:" + str(block) + " dir:" + str(i))
                         if (not block):
                             temp = Node(round(s.mDrone.mPos[0]+m.cos(s.mDrone.mAngle), 2), round(s.mDrone.mPos[1]-m.sin(s.mDrone.mAngle), 2))
@@ -46,11 +40,12 @@ class Ai:
                             if (not s.nodeExists(temp)):
                                 avDir = True
                                 break
-                        i += 1
                     if (avDir):
                         #goto curNode
                         #print ("Goto : " + str(s.mCurNode.mX) + " " + str(s.mCurNode.mY) + "\n")
                         s.goTo(temp)
+                        #print (s.getOppositeDir(s.getCardinalDir()))
+                        s.mCurNode.remove(s.getOppositeDir(s.getCardinalDir()))
                     else:
                         print ("Back Tracking")
                         #goto curNode.parent
@@ -68,12 +63,16 @@ class Ai:
             if (not s.mCurNode.mParent == None):
                 #print ("Goto : " + str(s.mCurNode.mParent.mX) + " " + str(s.mCurNode.mParent.mY) + "\n")
                 s.goTo(s.mCurNode.mParent)
-        if (s.mCurNode.mParent == None):
+        if (len(s.mCurNode.mDir) == 0 and s.mCurNode.mParent == None):
             print ("Home")
             s.setState(0)
+            for x in s.mMazeInfo:
+                if (not len(x.mDir) == 0):
+                    print (str(x.mDir) + " " + str(x.mX) + " " + str(x.mY))
             s.clearMaze()
                 
     def faceDir(s, _dir):
+        #time.sleep(0.5)
         #print ("Face Dir : " + str(_dir))
         while (not s.mDrone.mAngle == round(_dir, 2)):#needs to be better
             s.mDrone.turnLeft()
@@ -116,7 +115,16 @@ class Ai:
             #print("ParNode : " + str(s.mCurNode.mParent.mX) + " " + str(s.mCurNode.mParent.mY))
         else:
             s.mCurNode = existNode
-            
+
+    def getCardinalDir(s):
+        for i in range(len(s.mPosDir)):
+            if (round(s.mPosDir[i],2) == s.mDrone.mAngle):
+                return i
+    def getOppositeDir(s, _dir):
+        _dir -= 2
+        if (_dir < 0): _dir += 4
+        return _dir
+        
     def clearMaze(s):
         temp = s.mMazeInfo[0]
         s.mMazeInfo = []
