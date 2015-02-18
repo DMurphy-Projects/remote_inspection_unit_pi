@@ -1,17 +1,15 @@
 import socket
 
 TCP_IP = 'localhost'
-TCP_PORT = 5001
+TCP_PORT = 20
 
 sock = socket.socket()
 sock.connect((TCP_IP, TCP_PORT))
 _exit = False
 command = None
-para = None
 
 while True:
-    command = input("Command: ")    
-    sock.send( (str(len(command)).ljust(4)).encode())
+    command = raw_input("Command: ")    
     sock.send( command.encode() )
     if command == "exit":
         break      

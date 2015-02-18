@@ -1,11 +1,11 @@
-from tkinter import *
+from Tkinter import *
 from Ai import Ai
 from PIL import Image
 import threading as t
 import time
 import math as m
 import random as r
-import socket
+from BluetoothConnection import BluetoothConnection
 
 #0.3.0
 class turtle:
@@ -17,18 +17,15 @@ class turtle:
     #ob = [(5, 5)]
     movement = 1#many blocks turtle moves by
     mEnd = False
-    
-    TCP_IP = 'localhost'
-    TCP_PORT = 5001
-    sock = None#socket
-    conn = None
 
     ai = None
-    
+    bc = None
     def __init__(s):
         img = Image.open("maze.jpg")
         pixels = img.load()
         s.width, s.height = img.size
+
+        s.bc = BluetoothConnection(True)
         
         s.root = Tk()
         s.canvas = Canvas(s.root, width=s.width*10+10, height=s.height*10+10)
@@ -42,7 +39,6 @@ class turtle:
         s.clientThread.start()
 
         s.ai = Ai(s)
-
         for x in range(s.width):
             for y in range(s.height):
                 if (pixels[x, y] >= (0, 0, 0) and pixels[x, y] <= (10, 10, 10)):
@@ -55,51 +51,30 @@ class turtle:
             s.canvas.create_rectangle(x, y, x+10, y+10, fill='black')
         s.root.mainloop()
 
-    def recLength(s):#blocks thread with control
-        length = False
-        while not length:
-            length = s.recvall(s.conn,4)
-            if length or s.mEnd:break
-        return length
     #0 forward, 1 turnRight, 2 turnLeft, eg 010(forward 10)
     def clientControlled(s):#thread 02
-        s.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.sock.bind((s.TCP_IP, s.TCP_PORT))
-        s.sock.listen(True)
-        s.sock.settimeout(True)
-        print ("Waiting for Con")
+        s.bc.connect()
         while not s.mEnd:
-            try:
-                s.conn, addr = s.sock.accept()
-                print ("Connected")
-                break
-            except: pass
-        if not s.mEnd:
-            s.conn.settimeout(True)
-            while not s.mEnd:
-                length = s.recLength()
-                if s.mEnd:break
-                data = s.recvall(s.conn, int(length)).decode()
-                print ("command " + str(data))
-                if not data == "exit":
-                    command = data[:1]#first char
-                    para = data[1:]#from the first to the end
-                    if command == "0":
-                        para = int(para)
-                        if para < 1: para=1
-                        elif para > 100: para=100
-                        s.move(moves=para)
-                    elif command == "1" or command == "2":
-                        para = float(para)
-                        if para < 0: para=0
-                        elif para > 360: para=360
-                        para = (para/180) * (m.pi)
-                        if command == "1": s.turnRight(angle=para)
-                        elif command == "2": s.turnLeft(angle=para)
-                    elif command == "3":
-                        s.ai.setState(int(para))
-                else:
-                    s.__del__()
+            data = s.bc.recieve()
+            if not data == "exit":
+                command = data[:1]#first char
+                para = data[1:]#from the first to the end
+                if command == "0":
+                    para = int(para)
+                    if para < 1: para=1
+                    elif para > 100: para=100
+                    s.move(moves=para)
+                elif command == "1" or command == "2":
+                    para = float(para)
+                    if para < 0: para=0
+                    elif para > 360: para=360
+                    para = (para/180) * (m.pi)
+                    if command == "1": s.turnRight(angle=para)
+                    elif command == "2": s.turnLeft(angle=para)
+                elif command == "3":
+                    s.ai.setState(int(para))
+            else:
+                s.__del__()
         print ("Client Thread End")
             
     def userControlled(s):
@@ -177,24 +152,9 @@ class turtle:
                 return o
         return False
     
-    #for local host receiving
-    def recvall(s, sock, count):
-        try:
-            buf = b''
-            while count:
-                newbuf = sock.recv(count)
-                if not newbuf: return None
-                buf += newbuf
-                count -= len(newbuf)
-            return buf
-        except:
-            return False
-    
     def __del__(s):
         s.mEnd = True
-        if s.sock is not None:
-            print ("Socket End")
-            s.sock.close()
+        s.bc.stop()
         print ("Gui End")
         s.root.after(0, s.root.destroy)
                 
