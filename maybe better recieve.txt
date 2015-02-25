@@ -1,0 +1,13 @@
+Byte[] lenBytes = new Byte[16];
+                    int read = stream.Read(lenBytes, 0, 16);
+                    if (read == 0) break;
+                    int length = int.Parse(System.Text.Encoding.ASCII.GetString(lenBytes, 0, 16));
+
+                    Byte[] dataBytes = new Byte[length];
+                    int totalRead = 0;
+                    while (totalRead < length)
+                    {
+                        int bytesRead = stream.Read(dataBytes, totalRead, length - totalRead);
+                        totalRead += bytesRead;
+                        if (bytesRead == 0) break;
+                    }
