@@ -30,38 +30,37 @@ def posOnPer(per, angle):
     return (float(angle)/360)*per
 
 def targetAngle(lm, rm, diameter, tAngle):
-    curAngle = getAngle(lm-rm, diameter)
-    per = diameter * m.pi
-    curPos = posOnPer(per, curAngle)
-    tarPos = posOnPer(per, tAngle)
-    dLeft = curPos - tarPos
-    dRight = tarPos - curPos
-    if dLeft < 0: dLeft += per
-    if dRight < 0: dRight += per
-    #print "L %s, R %s" % (dLeft, dRight)
-    if (dLeft < dRight):
-        distance = dLeft
-        mod = (-1, 1)
-    else:
-        distance = dRight
-        mod = (1, -1)
-    leftMPos = lm + (mod[0] * distance/2)
-    rightMPos = rm + (mod[1] * distance/2)
-    print "L Pos %s, R Pos %s" % (decToLword(leftMPos), decToLword(rightMPos))
-    
+    curAngle = None
+    acc = 1.5
+    rightMov = 0
+    leftMov = 0
+    while not (curAngle < tAngle + acc/2 and curAngle > tAngle - acc/2) or curAngle is None:
+        curAngle = getAngle(lm-rm, diameter)
+        if curAngle > tAngle:
+            distance = curAngle - tAngle
+            left = True
+        else:
+            distance = tAngle - curAngle
+            left = False
+        if distance > 180 or distance < -180:
+            left = not left
+        if left:
+            leftMov += 1
+            rm += 5
+        else:
+            rightMov += 1
+            lm += 5
+        curAngle = getAngle(lm-rm, diameter)
+    print "Movements L: %s, R: %s, Angle %s, target %s" % (leftMov, rightMov, curAngle, tAngle)
+    return lm, rm
 
-diameter = 100
+diameter = 1000
 degreeMove = (m.pi * diameter)/360
 leftMotor = lwordToDec([0, 1, 0, 0])
-rightMotor = lwordToDec([0, 1, 0, 0])
+rightMotor = lwordToDec([255, 255, 255, 0])
 
-targetAngle(leftMotor, rightMotor, diameter, 90)
-
-print getAngle(leftMotor-rightMotor, diameter)
-leftMotor += 50
-rightMotor -= 50
-print getAngle(leftMotor-rightMotor, diameter)
-
-#targetAngle(leftMotor, rightMotor, diameter, 90)
+print "Start %s" % getAngle(leftMotor-rightMotor, diameter)
+leftMotor, rightMotor = targetAngle(leftMotor, rightMotor, diameter, 90)
+leftMotor, rightMotor = targetAngle(leftMotor, rightMotor, diameter, 180)
 
 
